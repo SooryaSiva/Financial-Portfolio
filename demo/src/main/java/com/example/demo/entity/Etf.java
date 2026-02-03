@@ -8,9 +8,11 @@ import java.math.BigDecimal;
 
 /**
  * Entity representing an ETF (Exchange-Traded Fund) asset.
+ * Joined to 'assets' table via FK on id.
  */
 @Entity
 @Table(name = "etfs")
+@DiscriminatorValue("ETF")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor

@@ -9,9 +9,11 @@ import java.time.LocalDate;
 
 /**
  * Entity representing a bond asset.
+ * Joined to 'assets' table via FK on id.
  */
 @Entity
 @Table(name = "bonds")
+@DiscriminatorValue("BOND")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor

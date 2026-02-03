@@ -8,9 +8,11 @@ import java.math.BigDecimal;
 
 /**
  * Entity representing a mutual fund asset.
+ * Joined to 'assets' table via FK on id.
  */
 @Entity
 @Table(name = "mutual_funds")
+@DiscriminatorValue("MUTUAL_FUND")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor

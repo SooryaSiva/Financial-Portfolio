@@ -6,9 +6,11 @@ import lombok.experimental.SuperBuilder;
 
 /**
  * Entity representing a cryptocurrency asset.
+ * Joined to 'assets' table via FK on id.
  */
 @Entity
 @Table(name = "cryptos")
+@DiscriminatorValue("CRYPTO")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor

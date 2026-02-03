@@ -6,9 +6,11 @@ import lombok.experimental.SuperBuilder;
 
 /**
  * Entity representing a stock/equity asset.
+ * Joined to 'assets' table via FK on id.
  */
 @Entity
 @Table(name = "stocks")
+@DiscriminatorValue("STOCK")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor

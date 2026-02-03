@@ -12,10 +12,18 @@ import java.time.LocalDateTime;
 
 /**
  * Abstract base entity for all financial assets.
- * Uses TABLE_PER_CLASS inheritance - each subclass gets its own table.
+ * Uses JOINED inheritance - base table 'assets' contains common fields,
+ * subclass tables contain only type-specific fields with FK to assets.id.
+ * 
+ * This design:
+ * - Eliminates field duplication across tables
+ * - Enables polymorphic queries (SELECT * FROM assets)
+ * - Maintains proper FK relationships
  */
 @Entity
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+@Table(name = "assets")
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "asset_type", discriminatorType = DiscriminatorType.STRING)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,7 +31,7 @@ import java.time.LocalDateTime;
 public abstract class BaseAsset {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "symbol", nullable = false, length = 20)

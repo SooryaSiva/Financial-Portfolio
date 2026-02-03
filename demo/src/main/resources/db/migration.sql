@@ -1,43 +1,36 @@
--- Migration script to create new asset tables
--- Run this after starting the application (Hibernate will auto-create tables)
--- This script migrates data from old 'assets' table to new type-specific tables
+-- Migration script for JOINED inheritance schema
+-- This creates proper FK relationships between base and subclass tables
+-- Run after first application startup creates the new tables
 
 USE portfolio_db;
 
--- Migrate stocks
-INSERT INTO stocks (id, symbol, name, quantity, buy_price, purchase_date, created_at, updated_at)
-SELECT id, symbol, name, quantity, buy_price, purchase_date, created_at, updated_at
-FROM assets WHERE type = 'STOCK';
+-- With JOINED inheritance, Hibernate creates:
+-- 1. 'assets' table with common fields (id, symbol, name, quantity, buy_price, etc.)
+-- 2. Subclass tables (stocks, bonds, etc.) with ONLY type-specific fields + FK to assets.id
 
--- Migrate bonds  
-INSERT INTO bonds (id, symbol, name, quantity, buy_price, purchase_date, created_at, updated_at)
-SELECT id, symbol, name, quantity, buy_price, purchase_date, created_at, updated_at
-FROM assets WHERE type = 'BOND';
+-- The schema now looks like:
+-- assets (base table)
+--   ├── id (PK)
+--   ├── asset_type (discriminator)
+--   ├── symbol, name, quantity, buy_price, purchase_date, created_at, updated_at
+--   │
+--   ├── stocks.id (FK → assets.id) + exchange, sector, dividend_yield, market_cap
+--   ├── bonds.id (FK → assets.id) + coupon_rate, maturity_date, issuer, bond_type, credit_rating
+--   ├── etfs.id (FK → assets.id) + expense_ratio, category, holdings_count, dividend_yield
+--   ├── mutual_funds.id (FK → assets.id) + fund_family, expense_ratio, category
+--   ├── cryptos.id (FK → assets.id) + blockchain, wallet_address, staking_enabled, staking_apy
+--   ├── real_estates.id (FK → assets.id) + property_address, property_type, rental_income
+--   └── cash_holdings.id (FK → assets.id) + currency, account_type, interest_rate, bank_name
 
--- Migrate ETFs
-INSERT INTO etfs (id, symbol, name, quantity, buy_price, purchase_date, created_at, updated_at)
-SELECT id, symbol, name, quantity, buy_price, purchase_date, created_at, updated_at
-FROM assets WHERE type = 'ETF';
+-- Benefits of JOINED inheritance:
+-- 1. No field duplication (common fields only in 'assets' table)
+-- 2. Polymorphic queries work: SELECT * FROM assets
+-- 3. Proper FK relationships between parent and child tables
+-- 4. Easy analytics across all asset types
 
--- Migrate mutual funds
-INSERT INTO mutual_funds (id, symbol, name, quantity, buy_price, purchase_date, created_at, updated_at)
-SELECT id, symbol, name, quantity, buy_price, purchase_date, created_at, updated_at
-FROM assets WHERE type = 'MUTUAL_FUND';
-
--- Migrate crypto
-INSERT INTO cryptos (id, symbol, name, quantity, buy_price, purchase_date, created_at, updated_at)
-SELECT id, symbol, name, quantity, buy_price, purchase_date, created_at, updated_at
-FROM assets WHERE type = 'CRYPTO';
-
--- Migrate real estate
-INSERT INTO real_estates (id, symbol, name, quantity, buy_price, purchase_date, created_at, updated_at)
-SELECT id, symbol, name, quantity, buy_price, purchase_date, created_at, updated_at
-FROM assets WHERE type = 'REAL_ESTATE';
-
--- Migrate cash
-INSERT INTO cash_holdings (id, symbol, name, quantity, buy_price, purchase_date, created_at, updated_at)
-SELECT id, symbol, name, quantity, buy_price, purchase_date, created_at, updated_at
-FROM assets WHERE type = 'CASH';
-
--- Optional: After verifying migration, you can drop the old table
--- DROP TABLE IF EXISTS assets;
+-- Sample insert for a stock (requires insert in both tables):
+-- INSERT INTO assets (symbol, name, quantity, buy_price, asset_type, purchase_date)
+-- VALUES ('AAPL', 'Apple Inc.', 50, 150.00, 'STOCK', '2024-01-15');
+-- 
+-- INSERT INTO stocks (id, exchange, sector, market_cap)
+-- VALUES (LAST_INSERT_ID(), 'NASDAQ', 'Technology', 'Large');
