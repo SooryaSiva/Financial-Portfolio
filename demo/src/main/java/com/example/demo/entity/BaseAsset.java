@@ -2,6 +2,7 @@ package com.example.demo.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -10,16 +11,24 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * Entity representing a financial asset in the portfolio.
- * Supports stocks, bonds, real estate, mutual funds, ETFs, crypto, and cash.
+ * Abstract base entity for all financial assets.
+ * Uses JOINED inheritance - base table 'assets' contains common fields,
+ * subclass tables contain only type-specific fields with FK to assets.id.
+ * 
+ * This design:
+ * - Eliminates field duplication across tables
+ * - Enables polymorphic queries (SELECT * FROM assets)
+ * - Maintains proper FK relationships
  */
 @Entity
 @Table(name = "assets")
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "asset_type", discriminatorType = DiscriminatorType.STRING)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class Asset {
+@SuperBuilder
+public abstract class BaseAsset {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,10 +39,6 @@ public class Asset {
 
     @Column(name = "name", nullable = false, length = 100)
     private String name;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "type", nullable = false)
-    private AssetType type;
 
     @Column(name = "quantity", nullable = false, precision = 19, scale = 4)
     private BigDecimal quantity;
@@ -51,6 +56,11 @@ public class Asset {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    /**
+     * Returns the asset type for this entity.
+     */
+    public abstract AssetType getType();
 
     /**
      * Calculates the total cost basis (quantity × buyPrice).
