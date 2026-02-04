@@ -5,6 +5,7 @@ import com.example.demo.dto.StockNews; // Import the new DTO
 import java.util.Map;
 import java.util.List;
 import java.time.LocalDate;
+
 /**
  * Service interface for fetching stock prices from external APIs.
  */

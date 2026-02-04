@@ -1,0 +1,74 @@
+package com.example.demo.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+/**
+ * Abstract base entity for all financial assets.
+ * Uses JOINED inheritance - base table 'assets' contains common fields,
+ * subclass tables contain only type-specific fields with FK to assets.id.
+ * 
+ * This design:
+ * - Eliminates field duplication across tables
+ * - Enables polymorphic queries (SELECT * FROM assets)
+ * - Maintains proper FK relationships
+ */
+@Entity
+@Table(name = "assets")
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "asset_type", discriminatorType = DiscriminatorType.STRING)
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@SuperBuilder
+public abstract class BaseAsset {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "symbol", nullable = false, length = 20)
+    private String symbol;
+
+    @Column(name = "name", nullable = false, length = 100)
+    private String name;
+
+    @Column(name = "quantity", nullable = false, precision = 19, scale = 4)
+    private BigDecimal quantity;
+
+    @Column(name = "buy_price", nullable = false, precision = 19, scale = 2)
+    private BigDecimal buyPrice;
+
+    @Column(name = "purchase_date")
+    private LocalDate purchaseDate;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    /**
+     * Returns the asset type for this entity.
+     */
+    public abstract AssetType getType();
+
+    /**
+     * Calculates the total cost basis (quantity × buyPrice).
+     */
+    public BigDecimal getCostBasis() {
+        if (quantity != null && buyPrice != null) {
+            return quantity.multiply(buyPrice);
+        }
+        return BigDecimal.ZERO;
+    }
+}
