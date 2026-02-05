@@ -45,12 +45,12 @@ jobs:
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: ${{ secrets.DB_PASSWORD }}
           FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
-          # Add any other API keys your app needs
       
       - name: Validate Frontend
         run: |
-          echo "Checking for JavaScript syntax errors..."
-          find ./frontend -name "*.js" -type f
+          echo "Checking for JavaScript files..."
+          find ./demo/src/main/resources/static -name "*.js" -type f
+          echo "Frontend validation complete!"
       
       - name: Upload test results
         if: always()
