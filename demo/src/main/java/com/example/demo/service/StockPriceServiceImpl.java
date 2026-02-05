@@ -47,6 +47,12 @@ public class StockPriceServiceImpl implements StockPriceService {
         this.objectMapper = new ObjectMapper();
     }
 
+    // Constructor for testing with mocked dependencies
+    public StockPriceServiceImpl(RestTemplate restTemplate, ObjectMapper objectMapper) {
+        this.restTemplate = restTemplate;
+        this.objectMapper = objectMapper;
+    }
+
     @Override
     public BigDecimal getCurrentPrice(String symbol) {
         if (symbol == null || symbol.isBlank()) {
