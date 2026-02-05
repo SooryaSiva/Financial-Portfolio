@@ -37,7 +37,6 @@ MANIFEST
 Thumbs.db
 
 # Model and Data Files
-*.pth
 *.pkl
 *.joblib
 *.h5
